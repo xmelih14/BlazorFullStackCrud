@@ -1,0 +1,81 @@
+﻿@page "/hero"
+@page "/hero/{id:int}"
+@inject ISuperHeroService SuperHeroService
+
+
+
+    <PageTitle>Yeni Kayıt Ekranı</PageTitle>
+    <h3>Yeni Kayıt Ekranı</h3>
+
+
+<EditForm Model="hero" OnSubmit="HandleSubmit">
+    <div>
+        <label for="firstname">Şirket Adı</label>
+        <InputText id="firstname" @bind-Value="hero.FirstName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="lastname">Pozisyon</label>
+        <InputText id="lastname" @bind-Value="hero.LastName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="heroname">Gün Sayısı</label>
+        <InputText id="heroname" @bind-Value="hero.HeroName" class="form-control"></InputText>
+    </div>
+   @* <div>
+        <label>Comic</label><br />
+        <InputSelect @bind-Value="hero.ComicId" class="form-select">
+            @foreach (var comic in SuperHeroService.Comics)
+            {
+                <option value="@comic.Id">@comic.Name</option>
+            }
+        </InputSelect>
+    </div> *@
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteHero">Silme</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    SuperHero hero = new SuperHero { Comic = new Comic() };
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Güncelle" : "Sil";
+        await SuperHeroService.GetComics();
+    }
+
+  /*  protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            hero.Comic = SuperHeroService.Comics[0];
+            hero.ComicId = hero.Comic.Id;
+        }
+        else
+        {
+            hero = await SuperHeroService.GetSingleHero((int)Id);
+        }
+    }*/
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await SuperHeroService.CreateHero(hero);
+        }
+        else
+        {
+            await SuperHeroService.UpdateHero(hero);
+        }
+    }
+
+    async Task DeleteHero()
+    {
+        await SuperHeroService.DeleteHero(hero.Id);
+    }
+}
